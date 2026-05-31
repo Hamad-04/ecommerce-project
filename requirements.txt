@@ -2,6 +2,8 @@ django
 gunicorn
 pandas
 numpy
+joblib
+scikit-learn
 openpyxl
 xlrd
 matplotlib
