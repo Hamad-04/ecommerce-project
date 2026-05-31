@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction History{% endblock %}
+
+{% block content %}
+
+<!-- ── Page Header ── -->
+<div class="page-header">
+  <div class="container">
+    <h1><i class="bi bi-clock-history me-2"></i>Prediction History</h1>
+    <p>All ML model predictions stored in the database via Django ORM</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ── Stats Row ── -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card text-center p-3">
+        <div style="font-size:1.8rem; font-weight:800; color:#2563EB;">{{ total_predictions }}</div>
+        <div class="text-muted small">Total Predictions</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card text-center p-3">
+        <div style="font-size:1.8rem; font-weight:800; color:#059669;">{{ high_value_count }}</div>
+        <div class="text-muted small">High Value</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card text-center p-3">
+        <div style="font-size:1.8rem; font-weight:800; color:#6366F1;">{{ low_value_count }}</div>
+        <div class="text-muted small">Low Value</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card text-center p-3">
+        <div style="font-size:1.8rem; font-weight:800; color:#D97706;">{{ avg_confidence }}%</div>
+        <div class="text-muted small">Avg Confidence</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Table ── -->
+  <div class="card mb-4">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-table text-primary"></i>
+        Prediction Logs
+        <span class="badge bg-primary ms-1">{{ total_predictions }}</span>
+      </div>
+      <a href="{% url 'analytics:predict' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-circle me-1"></i> New Prediction
+      </a>
+    </div>
+
+    {% if logs %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Qty</th>
+            <th>Price (£)</th>
+            <th>Month</th>
+            <th>Day</th>
+            <th>Hour</th>
+            <th>Prediction</th>
+            <th>Total (£)</th>
+            <th>Confidence</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+          <tr>
+            <td class="text-muted small">#{{ log.pk }}</td>
+            <td><strong>{{ log.quantity }}</strong></td>
+            <td>£{{ log.unit_price }}</td>
+            <td>{{ log.month }}</td>
+            <td>
+              {% if log.day_of_week == 0 %}Mon
+              {% elif log.day_of_week == 1 %}Tue
+              {% elif log.day_of_week == 2 %}Wed
+              {% elif log.day_of_week == 3 %}Thu
+              {% elif log.day_of_week == 4 %}Fri
+              {% elif log.day_of_week == 5 %}Sat
+              {% else %}Sun
+              {% endif %}
+            </td>
+            <td>{{ log.hour }}:00</td>
+            <td>
+              {% if log.predicted_label == 'high' %}
+                <span class="badge badge-high px-2 py-1">
+                  🚀 High Value
+                </span>
+              {% else %}
+                <span class="badge badge-low px-2 py-1">
+                  📦 Low Value
+                </span>
+              {% endif %}
+            </td>
+            <td><strong>£{{ log.predicted_total }}</strong></td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div style="width:50px; height:6px; background:#E5E7EB; border-radius:99px; overflow:hidden;">
+                  <div style="width:{{ log.confidence }}%; height:100%;
+                    background: {% if log.predicted_label == 'high' %}#059669{% else %}#2563EB{% endif %};
+                    border-radius:99px;"></div>
+                </div>
+                <small>{{ log.confidence }}%</small>
+              </div>
+            </td>
+            <td class="text-muted small">{{ log.created_at|date:"M d, Y H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-5">
+      <i class="bi bi-inbox fs-1 text-secondary" style="opacity:0.3;"></i>
+      <p class="text-muted mt-3">No predictions yet.</p>
+      <a href="{% url 'analytics:predict' %}" class="btn btn-primary">
+        <i class="bi bi-lightning-charge me-1"></i> Make Your First Prediction
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── ORM Note ── -->
+  <div class="card mb-4" style="border-left: 4px solid #2563EB;">
+    <div class="card-body p-3">
+      <h6 class="fw-bold mb-1">
+        <i class="bi bi-code-slash me-2 text-primary"></i>Django ORM — Database Query Used
+      </h6>
+      <pre style="background:#F8FAFC; border-radius:8px; padding:12px; font-size:0.82rem; margin:0;">
+<span style="color:#6B7280;"># views.py — prediction_history view</span>
+logs = PredictionLog.objects.all()          <span style="color:#6B7280;"># SELECT all rows</span>
+high_count = logs.filter(predicted_label=<span style="color:#059669;">'high'</span>).count()
+low_count  = logs.filter(predicted_label=<span style="color:#059669;">'low'</span>).count()
+avg_conf   = logs.aggregate(avg=Avg(<span style="color:#059669;">'confidence'</span>))[<span style="color:#059669;">'avg'</span>]</pre>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

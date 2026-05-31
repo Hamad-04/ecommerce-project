@@ -1,0 +1,382 @@
+{% extends "base.html" %}
+
+{% block title %}Sales Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- ── Page Header ── -->
+<div class="page-header">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between">
+      <div>
+        <h1><i class="bi bi-speedometer2 me-2"></i>Sales Dashboard</h1>
+        <p>E-Commerce Sales & Customer Behavior Analysis | UK Online Retail Dataset (2010–2011)</p>
+      </div>
+      <div class="text-end d-none d-md-block">
+        <span class="badge bg-light text-dark fs-6 px-3 py-2">
+          <i class="bi bi-database me-1"></i> 401,604 Records
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ── KPI Cards ── -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-lg">
+      <div class="card kpi-card kpi-revenue p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="kpi-label">Total Revenue</div>
+            <div class="kpi-value">£{{ total_revenue }}</div>
+          </div>
+          <i class="bi bi-currency-pound kpi-icon"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg">
+      <div class="card kpi-card kpi-orders p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="kpi-label">Total Orders</div>
+            <div class="kpi-value">{{ total_orders }}</div>
+          </div>
+          <i class="bi bi-bag-check kpi-icon"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg">
+      <div class="card kpi-card kpi-customers p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="kpi-label">Customers</div>
+            <div class="kpi-value">{{ total_customers }}</div>
+          </div>
+          <i class="bi bi-people kpi-icon"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg">
+      <div class="card kpi-card kpi-avg p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="kpi-label">Avg Order Value</div>
+            <div class="kpi-value">£{{ avg_order_value }}</div>
+          </div>
+          <i class="bi bi-bar-chart kpi-icon"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg">
+      <div class="card kpi-card kpi-products p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="kpi-label">Unique Products</div>
+            <div class="kpi-value">{{ total_products }}</div>
+          </div>
+          <i class="bi bi-box-seam kpi-icon"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Charts Row 1 ── -->
+  <div class="row g-4 mb-4">
+
+    <!-- Monthly Sales Line Chart -->
+    <div class="col-lg-8">
+      <div class="card h-100">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-graph-up text-primary"></i>
+          Monthly Sales Revenue (£ Thousands)
+        </div>
+        <div class="chart-container" style="height: 300px;">
+          <canvas id="monthlyChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day of Week Bar Chart -->
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-calendar-week text-secondary"></i>
+          Revenue by Day of Week (£K)
+        </div>
+        <div class="chart-container" style="height: 300px;">
+          <canvas id="dowChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Charts Row 2 ── -->
+  <div class="row g-4 mb-4">
+
+    <!-- Top Countries Chart -->
+    <div class="col-lg-5">
+      <div class="card h-100">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-globe text-success"></i>
+          Top 5 Countries by Revenue (£K)
+        </div>
+        <div class="chart-container" style="height: 300px;">
+          <canvas id="countryChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Products Chart -->
+    <div class="col-lg-7">
+      <div class="card h-100">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-trophy text-warning"></i>
+          Top 10 Products by Revenue (£K)
+        </div>
+        <div class="chart-container" style="height: 300px;">
+          <canvas id="productChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Insights & Predict CTA ── -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-lightbulb text-warning"></i>
+          Key Business Insights
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <div class="d-flex gap-3 align-items-start">
+                <div class="text-primary fs-4"><i class="bi bi-1-circle-fill"></i></div>
+                <div>
+                  <strong>UK Dominance</strong><br>
+                  <small class="text-muted">
+                    The United Kingdom accounts for ~89% of all transactions,
+                    making it the primary market for this retailer.
+                  </small>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="d-flex gap-3 align-items-start">
+                <div class="text-warning fs-4"><i class="bi bi-2-circle-fill"></i></div>
+                <div>
+                  <strong>Q4 Peak Season</strong><br>
+                  <small class="text-muted">
+                    Sales peak dramatically in October–November, indicating
+                    strong seasonal demand ahead of Christmas.
+                  </small>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="d-flex gap-3 align-items-start">
+                <div class="text-success fs-4"><i class="bi bi-3-circle-fill"></i></div>
+                <div>
+                  <strong>Weekday Sales</strong><br>
+                  <small class="text-muted">
+                    Thursday generates the highest revenue. Sunday has the
+                    lowest activity, suggesting B2B customer behavior.
+                  </small>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="d-flex gap-3 align-items-start">
+                <div class="text-danger fs-4"><i class="bi bi-4-circle-fill"></i></div>
+                <div>
+                  <strong>Gift & Home Focus</strong><br>
+                  <small class="text-muted">
+                    Top products are gift items and home decor, confirming
+                    this retailer specialises in the gift market segment.
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 border-0" style="background: linear-gradient(135deg,#2563EB,#6366F1); color:white;">
+        <div class="card-body d-flex flex-column justify-content-center text-center p-4">
+          <i class="bi bi-cpu fs-1 mb-3" style="opacity:0.7"></i>
+          <h5 class="fw-bold mb-2">ML Prediction</h5>
+          <p class="mb-3" style="opacity:0.85; font-size:0.9rem;">
+            Use our trained Random Forest model to predict whether a new
+            transaction will be a high-value or low-value order.
+          </p>
+          <a href="{% url 'analytics:predict' %}" class="btn btn-light fw-bold">
+            <i class="bi bi-arrow-right-circle me-1"></i> Try the Model
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── REST API Info ── -->
+  <div class="row g-4 mb-4">
+    <div class="col-12">
+      <div class="api-card p-4">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <i class="bi bi-code-slash fs-4 text-info"></i>
+          <h5 class="mb-0 text-white">REST API Endpoints</h5>
+          <span class="badge bg-success ms-2">Live</span>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <p class="text-white-50 mb-1 small">GET — Dashboard Statistics</p>
+            <pre class="mb-0">GET /api/stats/</pre>
+          </div>
+          <div class="col-md-6">
+            <p class="text-white-50 mb-1 small">POST — ML Model Prediction</p>
+            <pre class="mb-0">POST /api/predict/
+{
+  "quantity": 6,
+  "unit_price": 2.55,
+  "month": 12,
+  "day_of_week": 2,
+  "hour": 8
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Chart.js defaults ──────────────────────────────────────────────────────
+Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+Chart.defaults.color = '#6B7280';
+
+// ── Monthly Sales Line Chart ───────────────────────────────────────────────
+const monthlyLabels = {{ monthly_labels|safe }};
+const monthlyValues = {{ monthly_values|safe }};
+
+new Chart(document.getElementById('monthlyChart'), {
+  type: 'line',
+  data: {
+    labels: monthlyLabels,
+    datasets: [{
+      label: 'Revenue (£K)',
+      data: monthlyValues,
+      borderColor: '#2563EB',
+      backgroundColor: 'rgba(37,99,235,0.08)',
+      borderWidth: 2.5,
+      pointRadius: 5,
+      pointBackgroundColor: '#2563EB',
+      fill: true,
+      tension: 0.4,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { grid: { color: 'rgba(0,0,0,0.05)' }, beginAtZero: true },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ── Day of Week Bar Chart ──────────────────────────────────────────────────
+const dowLabels = {{ dow_labels|safe }};
+const dowValues = {{ dow_values|safe }};
+
+new Chart(document.getElementById('dowChart'), {
+  type: 'bar',
+  data: {
+    labels: dowLabels,
+    datasets: [{
+      label: 'Revenue (£K)',
+      data: dowValues,
+      backgroundColor: [
+        '#93C5FD','#93C5FD','#93C5FD',
+        '#2563EB',  // Thursday - highest
+        '#93C5FD','#BFDBFE','#DBEAFE'
+      ],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { grid: { color: 'rgba(0,0,0,0.05)' }, beginAtZero: true },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ── Top Countries Horizontal Bar Chart ────────────────────────────────────
+const countryLabels = {{ country_labels|safe }};
+const countryValues = {{ country_values|safe }};
+
+new Chart(document.getElementById('countryChart'), {
+  type: 'bar',
+  data: {
+    labels: countryLabels,
+    datasets: [{
+      label: 'Revenue (£K)',
+      data: countryValues,
+      backgroundColor: ['#2563EB','#6366F1','#059669','#D97706','#DC2626'],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(0,0,0,0.05)' }, beginAtZero: true },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// ── Top Products Bar Chart ─────────────────────────────────────────────────
+const productLabels = {{ product_labels|safe }};
+const productValues = {{ product_values|safe }};
+const productColors = productValues.map((_, i) =>
+  `hsl(${220 + i * 8}, 70%, ${55 - i * 3}%)`
+);
+
+new Chart(document.getElementById('productChart'), {
+  type: 'bar',
+  data: {
+    labels: productLabels,
+    datasets: [{
+      label: 'Revenue (£K)',
+      data: productValues,
+      backgroundColor: productColors,
+      borderRadius: 5,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(0,0,0,0.05)' }, beginAtZero: true },
+      y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+</script>
+{% endblock %}
